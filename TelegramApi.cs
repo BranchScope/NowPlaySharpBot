@@ -76,23 +76,22 @@ public class BotApi
     }
     
     //https://core.telegram.org/bots/api#sendaudio
-    public static async Task<Response> SendAudio(long chatId, string audio, string? caption = null, InlineKeyboard? keyboard = null)
+    public static async Task<Response> SendAudio(long chatId, string audio, string? thumbnail = null, string? caption = null, InlineKeyboard? keyboard = null)
     {
         var request = new RestRequest("sendAudio", Method.Post);
-        var param = new Dictionary<string, object>
-        {
-            { "chat_id", chatId },
-            { "audio", audio },
-            { "caption", caption },
-            { "parse_mode", "HTML" }
-        };
+        
+        request.AddHeader("Content-Type", "multipart/form-data");
+        request.AddParameter("chat_id", chatId);
+        request.AddParameter("caption", caption);
+        request.AddParameter("parse_mode", "HTML");
+        request.AddFile("audio", audio);
+        request.AddFile("thumbnail", thumbnail);
 
         if (keyboard != null)
         {
-            param.Add("reply_markup", JsonSerializer.Serialize(keyboard));
+            request.AddParameter("reply_markup", JsonSerializer.Serialize(keyboard));
         }
-
-        request.AddJsonBody(param);
+        
         var response = await Client.ExecutePostAsync(request);
         return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }

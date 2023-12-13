@@ -36,7 +36,7 @@ internal abstract class Program
                     await BotApi.SendMessage(update.Message.From.Id, "miao"); //test case without keyboard (dynamic params)
                     break;
                 case "/audio":
-                    //not implemented yet
+                    await BotApi.SendAudio(update.Message.From.Id, "The Chainsmokers - Something Just Like This.mp3");
                     break;
             }
         }
@@ -58,7 +58,8 @@ internal abstract class Program
             //The Chainsmokers - Something Just Like This.mp3
             if (update.InlineQuery.Query == "chainsmokers")
             {
-                //not implemented yet
+                var audio = new InlineQueryResultCachedAudio("audio", "chainsmokers", "CQACAgQAAxkDAAIZJWV6MOxYAhCWhUs1v8v46_qH18tDAALHEgACzq7QUzg6I1_VaUCJMwQ");
+                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, [audio]);
             }
             else
             {
