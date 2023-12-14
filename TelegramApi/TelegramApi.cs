@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using RestSharp;
 
-namespace NowPlaySharpBot;
+namespace NowPlaySharpBot.TelegramApi;
 
-public class BotApi
+public sealed class BotApi
 {
     private const string Resource = "https://api.telegram.org/bot";
     private static readonly string? Token = Environment.GetEnvironmentVariable("TOKEN");
@@ -31,12 +31,12 @@ public class BotApi
         }
     }
 
-    protected virtual void OnUpdateReceived(Update update)
+    private void OnUpdateReceived(Update update)
     {
         UpdateReceived?.Invoke(this, new UpdateEventArgs(update));
     }
 
-    //https://core.telegram.org/bots/api#getupdates
+    // https://core.telegram.org/bots/api#getupdates
     public static async Task<UpdateResponse> GetUpdates(int? offset = 0, int? limit = 100, int? timeout = 10, List<string>? allowedUpdates = null)
     {
         var request = new RestRequest("getUpdates", Method.Post);
@@ -53,7 +53,7 @@ public class BotApi
         return JsonSerializer.Deserialize<UpdateResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
 
-    //https://core.telegram.org/bots/api#sendmessage
+    // https://core.telegram.org/bots/api#sendmessage
     public static async Task<Response> SendMessage(long chatId, string text, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
     {
         var request = new RestRequest("sendMessage", Method.Post);
@@ -75,7 +75,7 @@ public class BotApi
         return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
-    //https://core.telegram.org/bots/api#sendaudio
+    // https://core.telegram.org/bots/api#sendaudio
     public static async Task<Response> SendAudio(long chatId, string audio, string? thumbnail = null, string? caption = null, InlineKeyboard? keyboard = null)
     {
         var request = new RestRequest("sendAudio", Method.Post);
@@ -85,7 +85,10 @@ public class BotApi
         request.AddParameter("caption", caption);
         request.AddParameter("parse_mode", "HTML");
         request.AddFile("audio", audio);
-        request.AddFile("thumbnail", thumbnail);
+        if (thumbnail != null)
+        {
+            request.AddFile("thumbnail", thumbnail);
+        }
 
         if (keyboard != null)
         {
@@ -96,7 +99,7 @@ public class BotApi
         return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
-    //https://core.telegram.org/bots/api#editmessagetext
+    // https://core.telegram.org/bots/api#editmessagetext
     public static async Task<Response> EditMessageText(long chatId, int messageId, string text, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
     {
         var request = new RestRequest("editMessageText", Method.Post);
@@ -119,7 +122,7 @@ public class BotApi
         return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
 
-    //https://core.telegram.org/bots/api#answercallbackquery
+    // https://core.telegram.org/bots/api#answercallbackquery
     public static async Task<Response> AnswerCallbackQuery(string callbackQueryId, int? cacheTime = 0, bool showAlert = false, string? text = null, string? url = null)
     {
         var request = new RestRequest("answerCallbackQuery", Method.Post);
@@ -145,7 +148,7 @@ public class BotApi
         return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
-    //https://core.telegram.org/bots/api#answerinlinequery
+    // https://core.telegram.org/bots/api#answerinlinequery
     public static async Task<Response> AnswerInlineQuery(string inlineQueryId, List<object> results)
     {
         var request = new RestRequest("answerInlineQuery", Method.Post);

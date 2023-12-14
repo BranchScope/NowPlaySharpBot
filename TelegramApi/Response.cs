@@ -2,7 +2,7 @@
 
 namespace NowPlaySharpBot;
 
-//https://core.telegram.org/bots/api#available-types
+// https://core.telegram.org/bots/api#available-types
 
 public record Response
 {

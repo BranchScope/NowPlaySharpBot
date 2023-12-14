@@ -1,4 +1,6 @@
-﻿namespace NowPlaySharpBot;
+﻿using NowPlaySharpBot.TelegramApi;
+
+namespace NowPlaySharpBot;
 
 internal abstract class Program
 {
@@ -37,6 +39,10 @@ internal abstract class Program
                     break;
                 case "/audio":
                     await BotApi.SendAudio(update.Message.From.Id, "The Chainsmokers - Something Just Like This.mp3");
+                    break;
+                case "/youtubedl":
+                    var audio = await YouTubeDL.YouTubeDL.Download("Tuttecose - Gazzelle");
+                    await BotApi.SendAudio(update.Message.From.Id, audio);
                     break;
             }
         }

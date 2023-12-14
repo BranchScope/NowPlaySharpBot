@@ -2,7 +2,7 @@
 
 namespace NowPlaySharpBot;
 
-//Update handler object
+// Update handler object
 public class UpdateEventArgs : EventArgs
 {
     public Update Update { get; }
@@ -13,8 +13,8 @@ public class UpdateEventArgs : EventArgs
     }
 }
 
-//https://core.telegram.org/bots/api#available-types
-//Those records are missing many stuffs, I don't need it.
+// https://core.telegram.org/bots/api#available-types
+// Those records are missing many stuffs, I don't need it.
 
 public record UpdateResponse
 {
