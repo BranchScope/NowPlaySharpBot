@@ -1,4 +1,6 @@
-﻿using NowPlaySharpBot.TelegramApi;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using NowPlaySharpBot.TelegramApi;
 
 namespace NowPlaySharpBot;
 
@@ -6,11 +8,17 @@ internal abstract class Program
 {
     private static async Task Main()
     {
+        var builder = WebApplication.CreateBuilder();
+        var app = builder.Build();
+
+        app.MapGet("/login", (string code, string state) => "wau");
+
+        var webTask = app.RunAsync("http://*:35139");
         var bot = new BotApi();
         bot.UpdateReceived += OnUpdate;
         var updateTask = bot.StartUpdatingAsync();
         Console.WriteLine("Bot is running, HALLELUJAH!");
-        await updateTask;
+        await Task.WhenAll(webTask, updateTask);
     }
     private static async void OnUpdate(object? sender, UpdateEventArgs e)
     {
@@ -43,6 +51,11 @@ internal abstract class Program
                 case "/youtubedl":
                     var audio = await YouTubeDL.YouTubeDL.Download("Tuttecose - Gazzelle");
                     await BotApi.SendAudio(update.Message.From.Id, audio);
+                    File.Delete(audio);
+                    break;
+                case "/login":
+                    var loginUrl = Spotify.Spotify.GenAuthUrl(Guid.NewGuid().ToString());
+                    await BotApi.SendMessage(update.Message.From.Id, $"Well: {loginUrl}");
                     break;
             }
         }
