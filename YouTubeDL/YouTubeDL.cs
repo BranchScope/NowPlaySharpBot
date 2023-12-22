@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace NowPlaySharpBot.YouTubeDL;
 
-public static class YouTubeDL
+public sealed class YouTubeDL
 {
     private const string Resource = "https://music.youtube.com";
     private const string YtDlpPath = "yt-dlp.exe";

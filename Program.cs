@@ -1,6 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using NowPlaySharpBot.TelegramApi;
+using NowPlaySharpBot.Database;
+using NowPlaySharpBot.Spotify;
+using NowPlaySharpBot.YouTubeDL;
+using Npgsql;
 
 namespace NowPlaySharpBot;
 
@@ -8,23 +13,30 @@ internal abstract class Program
 {
     private static async Task Main()
     {
-        var builder = WebApplication.CreateBuilder();
+        var db = await Database.Database.Connect();
+        Console.WriteLine(db);
+        /*var builder = WebApplication.CreateBuilder();
         var app = builder.Build();
 
         app.MapGet("/login", (string code, string state) => "wau");
 
-        var webTask = app.RunAsync("http://*:35139");
+        var webTask = app.RunAsync("http://*:35139");*/
         var bot = new BotApi();
         bot.UpdateReceived += OnUpdate;
-        var updateTask = bot.StartUpdatingAsync();
+        var updateTask = bot.StartUpdatingAsync(db);
         Console.WriteLine("Bot is running, HALLELUJAH!");
-        await Task.WhenAll(webTask, updateTask);
+        await updateTask;
     }
+    
     private static async void OnUpdate(object? sender, UpdateEventArgs e)
     {
         var update = e.Update;
+        var db = e.Database;
+        
         if (update.Message != null)
         {
+            var test = await Database.Database.CheckUser(db, update.Message.From.Id);
+            Console.WriteLine(test);
             switch (update.Message.Text)
             {
                 case "/start":

@@ -1,11 +1,10 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Web;
 using RestSharp;
 
 namespace NowPlaySharpBot.Spotify;
 
-public class Spotify
+public sealed class Spotify
 {
     private const string AuthResource = "https://accounts.spotify.com";
     private const string ApiResource = "https://api.spotify.com/v1";
@@ -26,12 +25,13 @@ public class Spotify
     };
     private static readonly RestClient AuthClient = new RestClient(options: AuthOptions);
 
+    // https://developer.spotify.com/documentation/web-api/tutorials/code-flow
     public static string GenAuthUrl(string state)
     {
         return $"{AuthResource}/authorize?response_type=code&client_id={ClientId}&scope={HttpUtility.UrlEncode(ApiScopes)}&redirect_uri={RedirectResource + "/login"}&state={state}";
     }
 
-
+    // https://developer.spotify.com/documentation/web-api/concepts/access-token
     public static async Task<dynamic?> GetAccessToken(string code)
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(ClientId + ":" + ClientSecret);
@@ -47,6 +47,7 @@ public class Spotify
         return JsonSerializer.Serialize(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
 
+    // https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens
     public static async Task<dynamic> RefreshToken(string refreshToken)
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(ClientId + ":" + ClientSecret);
@@ -62,6 +63,7 @@ public class Spotify
         return JsonSerializer.Serialize(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
+    // https://developer.spotify.com/documentation/web-api/reference/get-the-users-currently-playing-track
     public static async Task<dynamic?> GetCurrentlyPlaying(string code)
     {
         var request = new RestRequest("me/player/currently-playing", Method.Get);
@@ -71,6 +73,7 @@ public class Spotify
         return JsonSerializer.Serialize(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
+    // https://developer.spotify.com/documentation/web-api/reference/get-recently-played
     public static async Task<dynamic?> GetRecentlyPlayed(string code)
     {
         var request = new RestRequest("me/player/recently-played", Method.Get);

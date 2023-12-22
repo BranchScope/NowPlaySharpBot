@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Npgsql;
 using RestSharp;
 
 namespace NowPlaySharpBot.TelegramApi;
@@ -15,8 +16,9 @@ public sealed class BotApi
     private static readonly RestClient Client = new RestClient(options: Options);
     public event EventHandler<UpdateEventArgs>? UpdateReceived;
 
-    public async Task StartUpdatingAsync()
+    public async Task StartUpdatingAsync(NpgsqlConnection db)
     {
+        Console.WriteLine(db.State);
         var offset = 0;
         while (true)
         {
@@ -25,15 +27,14 @@ public sealed class BotApi
             if (!(updateResponse.Result?.Count > 0)) continue;
             var update = updateResponse.Result[0];
             offset = update.UpdateId + 1;
-
-            // Notify subscribers that an update is received
-            OnUpdateReceived(update);
+            
+            OnUpdateReceived(db, update);
         }
     }
 
-    private void OnUpdateReceived(Update update)
+    private void OnUpdateReceived(NpgsqlConnection db, Update update)
     {
-        UpdateReceived?.Invoke(this, new UpdateEventArgs(update));
+        UpdateReceived?.Invoke(this, new UpdateEventArgs(db, update));
     }
 
     // https://core.telegram.org/bots/api#getupdates

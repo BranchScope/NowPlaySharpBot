@@ -1,14 +1,18 @@
 ﻿using System.Text.Json.Serialization;
+using Npgsql;
 
 namespace NowPlaySharpBot;
 
 // Update handler object
 public class UpdateEventArgs : EventArgs
 {
+
+    public NpgsqlConnection Database { get; }
     public Update Update { get; }
 
-    public UpdateEventArgs(Update update)
+    public UpdateEventArgs(NpgsqlConnection db, Update update)
     {
+        Database = db;
         Update = update;
     }
 }
