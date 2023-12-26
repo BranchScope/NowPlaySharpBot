@@ -1,7 +1,5 @@
-﻿using System.Text.Json;
-using System.Text.Json.Nodes;
+﻿using NowPlaySharpBot.Spotify;
 using Npgsql;
-using NpgsqlTypes;
 
 namespace NowPlaySharpBot.Database;
 
@@ -23,14 +21,41 @@ public class Database
         return con;
     }
 
-    public static async Task<object?> CheckUser(NpgsqlConnection db, long user_id)
+    public static async Task<long> CheckUser(NpgsqlConnection db, long user_id)
     {
         var query = "SELECT COUNT(*) FROM users WHERE user_id = @user_id";
         var cmd = new NpgsqlCommand(query, db);
         cmd.Parameters.AddWithValue("user_id", user_id);
         await cmd.PrepareAsync();
-        var count = await cmd.ExecuteScalarAsync();
+        var count = (long)await cmd.ExecuteScalarAsync();
         return count;
+    }
+
+    public static async Task<int> AddUser(NpgsqlConnection db, User user)
+    {
+        var query = "INSERT INTO users(user_id, first_name, last_name, username, lang) VALUES(@user_id, @first_name, @last_name, @username, @lang)";
+        var cmd = new NpgsqlCommand(query, db);
+        cmd.Parameters.AddWithValue("user_id", user.Id);
+        cmd.Parameters.AddWithValue("first_name", user.FirstName);
+        cmd.Parameters.AddWithValue("last_name", user.LastName ?? null);
+        cmd.Parameters.AddWithValue("username", user.Username ?? null);
+        cmd.Parameters.AddWithValue("lang", user.LanguageCode ?? null);
+        await cmd.PrepareAsync();
+        var r = await cmd.ExecuteNonQueryAsync();
+        return r;
+    }
+
+    public static async Task<int> AddTokens(NpgsqlConnection db, AuthResponse auth, string state)
+    {
+        var user_id = BitConverter.ToString(System.Convert.FromBase64String(state));
+        var query = "INSERT INTO tokens(user_id, access_token, refresh_token) VALUES(@user_id, @access_token, @refresh_token)";
+        var cmd = new NpgsqlCommand(query, db);
+        cmd.Parameters.AddWithValue("user_id", user_id);
+        cmd.Parameters.AddWithValue("access_token", auth.AccessToken);
+        cmd.Parameters.AddWithValue("refresh_token", auth.RefreshToken);
+        await cmd.PrepareAsync();
+        var r = await cmd.ExecuteNonQueryAsync();
+        return r;
     }
 
     public async Task<dynamic?> Select(NpgsqlConnection db, long user_id)

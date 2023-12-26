@@ -18,14 +18,14 @@ public sealed class BotApi
 
     public async Task StartUpdatingAsync(NpgsqlConnection db)
     {
-        Console.WriteLine(db.State);
+        await BotApi.GetUpdates(-1, 1);
         var offset = 0;
         while (true)
         {
             var updateResponse = await BotApi.GetUpdates(offset, 1);
             if (updateResponse.Ok != true) continue;
             if (!(updateResponse.Result?.Count > 0)) continue;
-            var update = updateResponse.Result[0];
+            var update = updateResponse.Result[^1];
             offset = update.UpdateId + 1;
             
             OnUpdateReceived(db, update);

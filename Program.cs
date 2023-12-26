@@ -15,17 +15,17 @@ internal abstract class Program
     {
         var db = await Database.Database.Connect();
         Console.WriteLine(db);
-        /*var builder = WebApplication.CreateBuilder();
+        var builder = WebApplication.CreateBuilder();
         var app = builder.Build();
 
-        app.MapGet("/login", (string code, string state) => "wau");
+        app.MapGet("/login", async (string code, string state) => (await Spotify.Spotify.Login(code, state, db)));
 
-        var webTask = app.RunAsync("http://*:35139");*/
+        var webTask = app.RunAsync("http://*:35139");
         var bot = new BotApi();
         bot.UpdateReceived += OnUpdate;
         var updateTask = bot.StartUpdatingAsync(db);
         Console.WriteLine("Bot is running, HALLELUJAH!");
-        await updateTask;
+        await Task.WhenAll(webTask, updateTask);
     }
     
     private static async void OnUpdate(object? sender, UpdateEventArgs e)
@@ -37,6 +37,11 @@ internal abstract class Program
         {
             var test = await Database.Database.CheckUser(db, update.Message.From.Id);
             Console.WriteLine(test);
+            if (test == 0)
+            {
+                var a = await Database.Database.AddUser(db, update.Message.From);
+                Console.WriteLine(a);
+            }
             switch (update.Message.Text)
             {
                 case "/start":
@@ -66,6 +71,7 @@ internal abstract class Program
                     File.Delete(audio);
                     break;
                 case "/login":
+                    var state = Convert.ToBase64String(BitConverter.GetBytes(update.Message.From.Id));
                     var loginUrl = Spotify.Spotify.GenAuthUrl(Guid.NewGuid().ToString());
                     await BotApi.SendMessage(update.Message.From.Id, $"Well: {loginUrl}");
                     break;
