@@ -75,6 +75,14 @@ internal abstract class Program
                     var loginUrl = Spotify.Spotify.GenAuthUrl(Guid.NewGuid().ToString());
                     await BotApi.SendMessage(update.Message.From.Id, $"Well: {loginUrl}");
                     break;
+                case "/empty":
+                    var empty = await BotApi.SendAudio(update.Message.From.Id, "empty.mp3");
+                    Console.WriteLine(empty.Dump());
+                    break;
+                case "/gettokens":
+                    var tokens = await Database.Database.GetTokens(db, update.Message.From.Id);
+                    Console.WriteLine(tokens.Dump());
+                    break;
             }
         }
 
@@ -92,7 +100,11 @@ internal abstract class Program
         if (update.InlineQuery != null)
         {
             Console.WriteLine(update.InlineQuery.Query);
-            //The Chainsmokers - Something Just Like This.mp3
+            var tokens = await Database.Database.GetTokens(db, update.InlineQuery.From.Id);
+            if (tokens.Count == 0)
+            {
+                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, [], new InlineQueryResultButton("help?", null, "help"));
+            }
             if (update.InlineQuery.Query == "chainsmokers")
             {
                 var audio = new InlineQueryResultCachedAudio("audio", "chainsmokers", "CQACAgQAAxkDAAIZJWV6MOxYAhCWhUs1v8v46_qH18tDAALHEgACzq7QUzg6I1_VaUCJMwQ");

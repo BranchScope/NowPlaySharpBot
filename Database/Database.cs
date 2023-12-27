@@ -58,15 +58,21 @@ public class Database
         return r;
     }
 
-    public async Task<dynamic?> Select(NpgsqlConnection db, long user_id)
+    public static async Task<List<object>> GetTokens(NpgsqlConnection db, long user_id)
     {
-        var cmd = new NpgsqlCommand($"SELECT * FROM users", db);
-        //cmd.Parameters.AddWithValue("user_id", user_id);
+        var cmd = new NpgsqlCommand($"SELECT access_token,refresh_token FROM tokens WHERE user_id = @user_id", db);
+        cmd.Parameters.AddWithValue("user_id", user_id);
         await cmd.PrepareAsync();
         var dr = await cmd.ExecuteReaderAsync();
-        while (dr.Read())
-            Console.Write("{0}\t{1} \n", dr[0], dr[1]);
-        return false;
+        if (dr.Read() == false)
+        {
+            await dr.CloseAsync();
+            return [];
+        }
+
+        var tokens = new List<object> { dr[0], dr[1] };
+        await dr.CloseAsync();
+        return tokens;
     }
     
 }

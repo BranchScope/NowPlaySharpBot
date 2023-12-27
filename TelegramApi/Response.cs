@@ -7,7 +7,7 @@ namespace NowPlaySharpBot;
 public record Response
 {
     [JsonPropertyName("ok")] public bool Ok { get; init; }
-    [JsonPropertyName("result")] public object? Result { get; init; }
+    [JsonPropertyName("result")] public Result? Result { get; init; }
     
     // error handling
     [JsonPropertyName("error_code")] public int? ErrorCode { get; init; }
@@ -23,6 +23,9 @@ public record Result
     [JsonPropertyName("date")] public int? Date { get; init; }
     [JsonPropertyName("text")] public string? Text { get; init; }
     
+    // sendAudio
+    [JsonPropertyName("audio")] public Audio? Audio { get; init; }
+    
     // getMe
     [JsonPropertyName("can_join_groups")] public bool? CanJoinGroups { get; init; }
     [JsonPropertyName("can_read_all_group_messages")] public bool? CanReadAllMessages { get; init; }
@@ -31,7 +34,7 @@ public record Result
 
 public record From
 {
-    [JsonPropertyName("id")] public int Id { get; init; }
+    [JsonPropertyName("id")] public long Id { get; init; }
     [JsonPropertyName("is_bot")] public bool IsBot { get; init; }
     [JsonPropertyName("first_name")] public required string FirstName { get; init; }
     [JsonPropertyName("last_name")] public string? LastName { get; init; }
@@ -45,4 +48,16 @@ public record Chat
     [JsonPropertyName("last_name")] public string? LastName { get; init; }
     [JsonPropertyName("username")] public string? Username { get; init; }
     [JsonPropertyName("type")] public required string Type { get; init; }
+}
+
+public record Audio
+{
+    [JsonPropertyName("file_id")] public required string FileId { get; init; }
+    [JsonPropertyName("file_unique_id")] public required string FileUniqueId { get; init; }
+    [JsonPropertyName("duration")] public int Id { get; init; }
+    [JsonPropertyName("performer")] public string? Performer { get; init; }
+    [JsonPropertyName("title")] public string? Title { get; init; }
+    [JsonPropertyName("file_name")] public string? FileName { get; init; }
+    [JsonPropertyName("mime_type")] public string? MimeType { get; init; }
+    //[JsonPropertyName("thumbnail")] public PhotoSize? Thumbnail { get; init; } (it doesn't glue me and I don't need it)
 }
