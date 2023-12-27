@@ -1,13 +1,14 @@
 ﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
 
 namespace NowPlaySharpBot;
 
 // https://core.telegram.org/bots/api#available-types
 
-public record Response
+public record Response<T>
 {
     [JsonPropertyName("ok")] public bool Ok { get; init; }
-    [JsonPropertyName("result")] public Result? Result { get; init; }
+    [JsonPropertyName("result")] public T? Result { get; init; }
     
     // error handling
     [JsonPropertyName("error_code")] public int? ErrorCode { get; init; }

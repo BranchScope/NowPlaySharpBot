@@ -55,7 +55,7 @@ public sealed class BotApi
     }
 
     // https://core.telegram.org/bots/api#sendmessage
-    public static async Task<Response> SendMessage(long chatId, string text, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
+    public static async Task<Response<Result>> SendMessage(long chatId, string text, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
     {
         var request = new RestRequest("sendMessage", Method.Post);
         var param = new Dictionary<string, object>
@@ -73,11 +73,11 @@ public sealed class BotApi
 
         request.AddJsonBody(param);
         var response = await Client.ExecutePostAsync(request);
-        return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        return JsonSerializer.Deserialize<Response<Result>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
     // https://core.telegram.org/bots/api#sendaudio
-    public static async Task<Response> SendAudio(long chatId, string audio, string? thumbnail = null, string? caption = null, InlineKeyboard? keyboard = null)
+    public static async Task<Response<Result>> SendAudio(long chatId, string audio, string? thumbnail = null, string? caption = null, InlineKeyboard? keyboard = null)
     {
         var request = new RestRequest("sendAudio", Method.Post);
         
@@ -97,11 +97,11 @@ public sealed class BotApi
         }
         
         var response = await Client.ExecutePostAsync(request);
-        return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        return JsonSerializer.Deserialize<Response<Result>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
     // https://core.telegram.org/bots/api#editmessagetext
-    public static async Task<Response> EditMessageText(long chatId, int messageId, string text, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
+    public static async Task<Response<Result>> EditMessageText(long chatId, int messageId, string text, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
     {
         var request = new RestRequest("editMessageText", Method.Post);
         var param = new Dictionary<string, object>
@@ -120,11 +120,11 @@ public sealed class BotApi
         
         request.AddJsonBody(param);
         var response = await Client.ExecutePostAsync(request);
-        return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        return JsonSerializer.Deserialize<Response<Result>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
 
     // https://core.telegram.org/bots/api#answercallbackquery
-    public static async Task<Response> AnswerCallbackQuery(string callbackQueryId, int? cacheTime = 0, bool showAlert = false, string? text = null, string? url = null)
+    public static async Task<Response<Result>> AnswerCallbackQuery(string callbackQueryId, int? cacheTime = 0, bool showAlert = false, string? text = null, string? url = null)
     {
         var request = new RestRequest("answerCallbackQuery", Method.Post);
         var param = new Dictionary<string, object>
@@ -146,17 +146,18 @@ public sealed class BotApi
         
         request.AddJsonBody(param);
         var response = await Client.ExecutePostAsync(request);
-        return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        return JsonSerializer.Deserialize<Response<Result>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
     // https://core.telegram.org/bots/api#answerinlinequery
-    public static async Task<Response> AnswerInlineQuery(string inlineQueryId, List<object> results, InlineQueryResultButton? button = null)
+    public static async Task<Response<bool>> AnswerInlineQuery(string inlineQueryId, List<object> results, InlineQueryResultButton? button = null)
     {
         var request = new RestRequest("answerInlineQuery", Method.Post);
         var param = new Dictionary<string, object>
         {
             { "inline_query_id", inlineQueryId },
-            { "results", results }
+            { "results", results },
+            { "cache_time", 0 }
         };
 
         if (button != null)
@@ -166,6 +167,6 @@ public sealed class BotApi
 
         request.AddJsonBody(param);
         var response = await Client.ExecutePostAsync(request);
-        return JsonSerializer.Deserialize<Response>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        return JsonSerializer.Deserialize<Response<bool>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
 }

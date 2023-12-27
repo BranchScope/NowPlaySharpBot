@@ -99,11 +99,10 @@ internal abstract class Program
 
         if (update.InlineQuery != null)
         {
-            Console.WriteLine(update.InlineQuery.Query);
             var tokens = await Database.Database.GetTokens(db, update.InlineQuery.From.Id);
             if (tokens.Count == 0)
             {
-                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, [], new InlineQueryResultButton("help?", null, "help"));
+                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, [], new InlineQueryResultButton("you could stay under my umbrella ella ella eh eh eh", null, "help"));
             }
             if (update.InlineQuery.Query == "chainsmokers")
             {
