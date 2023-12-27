@@ -102,6 +102,60 @@ public class InlineQueryResultCachedAudio
     
 }
 
+public class InlineQueryResultAudio
+{
+    [JsonPropertyName("type")]
+    public string Type { get; init; }
+    
+    [JsonPropertyName("id")] 
+    public string Id { get; init; }
+    
+    [JsonPropertyName("audio_url")]
+    public string AudioUrl { get; init; }
+    
+    [JsonPropertyName("title")]
+    public string Title { get; init; }
+    
+    [JsonPropertyName("caption")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Caption { get; init; }
+    
+    [JsonPropertyName("parse_mode")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ParseMode { get; init; }
+    
+    [JsonPropertyName("performer")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Performer { get; init; }
+    
+    [JsonPropertyName("audio_duration")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? AudioDuration { get; init; }
+    
+    [JsonPropertyName("reply_markup")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public InlineKeyboard? ReplyMarkup { get; init; }
+    
+    [JsonPropertyName("input_message_content")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public InputMessageContent? InputMessageContent { get; init; }
+    
+    public InlineQueryResultAudio(string type, string id, string audioUrl, string title, string? performer = null, int? audioDuration = null, string? caption = null, string? parseMode = "HTML", InlineKeyboard? replyMarkup = null, InputMessageContent? inputMessageContent = null)
+    {
+        Type = type;
+        Id = id;
+        AudioUrl = audioUrl;
+        Title = title;
+        Caption = caption;
+        ParseMode = parseMode;
+        Performer = performer;
+        AudioDuration = audioDuration;
+        ReplyMarkup = replyMarkup;
+        InputMessageContent = inputMessageContent;
+    }
+    
+}
+
 public class InputMessageContent
 {
     [JsonPropertyName("message_text")] 

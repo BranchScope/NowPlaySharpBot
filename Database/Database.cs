@@ -37,9 +37,9 @@ public class Database
         var cmd = new NpgsqlCommand(query, db);
         cmd.Parameters.AddWithValue("user_id", user.Id);
         cmd.Parameters.AddWithValue("first_name", user.FirstName);
-        cmd.Parameters.AddWithValue("last_name", user.LastName ?? null);
-        cmd.Parameters.AddWithValue("username", user.Username ?? null);
-        cmd.Parameters.AddWithValue("lang", user.LanguageCode ?? null);
+        cmd.Parameters.AddWithValue("last_name", user.LastName ?? "");
+        cmd.Parameters.AddWithValue("username", user.Username ?? "");
+        cmd.Parameters.AddWithValue("lang", user.LanguageCode ?? "");
         await cmd.PrepareAsync();
         var r = await cmd.ExecuteNonQueryAsync();
         return r;
@@ -47,7 +47,7 @@ public class Database
 
     public static async Task<int> AddTokens(NpgsqlConnection db, AuthResponse auth, string state)
     {
-        var user_id = BitConverter.ToString(System.Convert.FromBase64String(state));
+        var user_id = BitConverter.ToInt64(Convert.FromBase64String(state));
         var query = "INSERT INTO tokens(user_id, access_token, refresh_token) VALUES(@user_id, @access_token, @refresh_token)";
         var cmd = new NpgsqlCommand(query, db);
         cmd.Parameters.AddWithValue("user_id", user_id);
@@ -73,6 +73,17 @@ public class Database
         var tokens = new List<object> { dr[0], dr[1] };
         await dr.CloseAsync();
         return tokens;
+    }
+    
+    public static async Task<int> UpdateAccessToken(NpgsqlConnection db, AuthResponse auth, long user_id)
+    {
+        var query = "UPDATE tokens SET access_token = @access_token WHERE user_id = @user_id";
+        var cmd = new NpgsqlCommand(query, db);
+        cmd.Parameters.AddWithValue("access_token", auth.AccessToken);
+        cmd.Parameters.AddWithValue("user_id", user_id);
+        await cmd.PrepareAsync();
+        var r = await cmd.ExecuteNonQueryAsync();
+        return r;
     }
     
 }

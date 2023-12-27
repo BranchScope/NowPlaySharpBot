@@ -11,7 +11,7 @@ public sealed class Spotify
 {
     private const string AuthResource = "https://accounts.spotify.com";
     private const string ApiResource = "https://api.spotify.com/v1";
-    private const string RedirectResource = "https://nps.branchscope.eu.org";
+    private const string RedirectResource = "https://nps.heromapia4.keenetic.link";
     private static readonly string? ClientId = Environment.GetEnvironmentVariable("CLIENT_ID");
     private static readonly string? ClientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
     private const string ApiScopes = "user-read-currently-playing user-read-recently-played";
@@ -51,7 +51,7 @@ public sealed class Spotify
     }
 
     // https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens
-    private static async Task<AuthResponse> RefreshToken(string refreshToken)
+    public static async Task<AuthResponse> RefreshToken(string? refreshToken)
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(ClientId + ":" + ClientSecret);
         var base64Credentials = Convert.ToBase64String(plainTextBytes);
@@ -67,12 +67,13 @@ public sealed class Spotify
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-the-users-currently-playing-track
-    public static async Task<CurrentlyPlayingResponse> GetCurrentlyPlaying(string code)
+    public static async Task<CurrentlyPlayingResponse> GetCurrentlyPlaying(string? code)
     {
         var request = new RestRequest("me/player/currently-playing", Method.Get);
         request.AddHeader("Authorization", $"Bearer {code}");
 
         var response = await ApiClient.ExecuteGetAsync(request);
+        Console.WriteLine(response.Content);
         return JsonSerializer.Deserialize<CurrentlyPlayingResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
@@ -81,6 +82,7 @@ public sealed class Spotify
     {
         var request = new RestRequest("me/player/recently-played", Method.Get);
         request.AddHeader("Authorization", $"Bearer {code}");
+        request.AddParameter("limit", 4);
 
         var response = await ApiClient.ExecuteGetAsync(request);
         return JsonSerializer.Deserialize<RecentlyPlayedResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");

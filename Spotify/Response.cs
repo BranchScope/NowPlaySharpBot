@@ -20,13 +20,18 @@ public record CurrentlyPlayingResponse
     [JsonPropertyName("item")] public Item? Item { get; init; }
     
     // error handling
-    [JsonPropertyName("status")] public int? Status { get; init; }
-    [JsonPropertyName("message")] public string? Message { get; init; }
+    [JsonPropertyName("error")] public Error? Error { get; init; }
 }
 
 public record RecentlyPlayedResponse
 {
-    [JsonPropertyName("items")] public List<Item>? Items { get; init; }
+    [JsonPropertyName("items")] public List<Track>? Items { get; init; }
+    [JsonPropertyName("error")] public Error? Error { get; init; }
+}
+
+public record Track
+{
+    [JsonPropertyName("track")] public Item? Item { get; init; }
 }
 
 public record Item
@@ -35,6 +40,8 @@ public record Item
     [JsonPropertyName("name")] public string? Name { get; init; }
     [JsonPropertyName("album")] public Album? Album { get; init; }
     [JsonPropertyName("artists")] public List<Artist>? Artists { get; init; }
+    [JsonPropertyName("preview_url")] public string? PreviewUrl { get; init; }
+    [JsonPropertyName("duration_ms")] public int? DurationMs { get; init; }
 }
 
 public record Album
@@ -51,4 +58,10 @@ public record Images
 public record Artist
 {
     [JsonPropertyName("name")] public string? Name { get; init; }
+}
+
+public record Error
+{
+    [JsonPropertyName("status")] public int? Status { get; init; }
+    [JsonPropertyName("message")] public string? Message { get; init; }
 }

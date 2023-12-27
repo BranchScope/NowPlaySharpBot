@@ -124,7 +124,7 @@ public sealed class BotApi
     }
 
     // https://core.telegram.org/bots/api#answercallbackquery
-    public static async Task<Response<Result>> AnswerCallbackQuery(string callbackQueryId, int? cacheTime = 0, bool showAlert = false, string? text = null, string? url = null)
+    public static async Task<Response<Result>> AnswerCallbackQuery(string callbackQueryId, int cacheTime = 0, bool showAlert = false, string? text = null, string? url = null)
     {
         var request = new RestRequest("answerCallbackQuery", Method.Post);
         var param = new Dictionary<string, object>
@@ -150,14 +150,14 @@ public sealed class BotApi
     }
     
     // https://core.telegram.org/bots/api#answerinlinequery
-    public static async Task<Response<bool>> AnswerInlineQuery(string inlineQueryId, List<object> results, InlineQueryResultButton? button = null)
+    public static async Task<Response<bool>> AnswerInlineQuery(string inlineQueryId, List<object> results, InlineQueryResultButton? button = null, int cacheTime = 0)
     {
         var request = new RestRequest("answerInlineQuery", Method.Post);
         var param = new Dictionary<string, object>
         {
             { "inline_query_id", inlineQueryId },
             { "results", results },
-            { "cache_time", 0 }
+            { "cache_time", cacheTime }
         };
 
         if (button != null)
