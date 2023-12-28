@@ -20,12 +20,12 @@ public sealed class YouTubeDL
     /// There are no checks there either, but it is well known that YouTube Music has more music than other platforms
     /// (They are all excuses to the fact that I don't want to create a downloader for Deezer :P)
     /// </summary>
-    public static async Task<dynamic?> Download(string query)
+    public static async Task<dynamic?> Download(string query, string songId)
     {
         var process = new ProcessStartInfo
         {
             FileName = YtDlpPath,
-            Arguments = $"-f bestaudio -x --audio-format mp3 --audio-quality 320k --add-metadata --output \"%(title)s.%(ext)s\" \"{Resource}/search?q={query}\" --playlist-items 1",
+            Arguments = $"-f bestaudio -x --audio-format mp3 --audio-quality 320k --add-metadata --output \"{songId}.%(ext)s\" \"{Resource}/search?q={query}\" --playlist-items 1",
             RedirectStandardOutput = true,
         };
         var proc = Process.Start(process);

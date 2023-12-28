@@ -139,6 +139,7 @@ public sealed class BotApi
         return JsonSerializer.Deserialize<Response<Result>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
+    // https://core.telegram.org/bots/api#editmessagemedia
     public static async Task<Response<bool>> EditMessageMedia(string inlineMessageId, InputMediaAudio audio, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
     {
         var request = new RestRequest("editMessageMedia", Method.Post);
@@ -157,7 +158,6 @@ public sealed class BotApi
         
         request.AddJsonBody(param);
         var response = await Client.ExecutePostAsync(request);
-        Console.WriteLine(response.Content);
         return JsonSerializer.Deserialize<Response<bool>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
 

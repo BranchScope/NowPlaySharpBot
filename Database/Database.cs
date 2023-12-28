@@ -64,6 +64,7 @@ public class Database
         cmd.Parameters.AddWithValue("user_id", user_id);
         await cmd.PrepareAsync();
         var dr = await cmd.ExecuteReaderAsync();
+        
         if (dr.Read() == false)
         {
             await dr.CloseAsync();
@@ -84,6 +85,39 @@ public class Database
         await cmd.PrepareAsync();
         var r = await cmd.ExecuteNonQueryAsync();
         return r;
+    }
+
+    public static async Task<int> AddMusic(NpgsqlConnection db, string songId, string title, string artist, string? album, string? thumbnail, string fileId)
+    {
+        var query = "INSERT INTO music(song_id, title, artist, album, thumbnail, file_id) VALUES(@song_id, @title, @artist, @album, @thumbnail, @file_id)";
+        var cmd = new NpgsqlCommand(query, db);
+        cmd.Parameters.AddWithValue("song_id", songId);
+        cmd.Parameters.AddWithValue("title", title);
+        cmd.Parameters.AddWithValue("artist", artist);
+        cmd.Parameters.AddWithValue("album", album);
+        cmd.Parameters.AddWithValue("thumbnail", thumbnail);
+        cmd.Parameters.AddWithValue("file_id", fileId);
+        await cmd.PrepareAsync();
+        var r = await cmd.ExecuteNonQueryAsync();
+        return r;
+    }
+    
+    public static async Task<string?> GetMusic(NpgsqlConnection db, string songId)
+    {
+        var cmd = new NpgsqlCommand($"SELECT file_id FROM music WHERE song_id = @song_id", db);
+        cmd.Parameters.AddWithValue("song_id", songId);
+        await cmd.PrepareAsync();
+        var dr = await cmd.ExecuteReaderAsync();
+        
+        if (dr.Read() == false)
+        {
+            await dr.CloseAsync();
+            return null;
+        }
+
+        var fileId = dr[0].ToString();
+        await dr.CloseAsync();
+        return fileId;
     }
     
 }
