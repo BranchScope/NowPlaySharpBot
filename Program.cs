@@ -29,13 +29,6 @@ internal abstract class Program
         });
 
         app.MapGet("/login", async (string code, string state) => (await Spotify.Spotify.Login(code, state, db)));
-        /*app.MapGet("/empty", () =>  
-        {  
-            var filename = "empty.mp3";
-  
-            var filestream = System.IO.File.OpenRead(filename);  
-            return Results.File(filestream, contentType: "audio/mpeg", fileDownloadName: filename, enableRangeProcessing: true);   
-        });*/ 
 
         var webTask = app.RunAsync("http://*:35139");
         var bot = new BotApi();
@@ -134,6 +127,13 @@ internal abstract class Program
             else
             {
                 List<object> resultsList = [];
+                var keyboard = new InlineKeyboard(
+                    [
+                        [
+                            new Button("Loading...", callbackData: "loading")
+                        ]
+                    ]
+                );
                 var currentlyPlaying = await Spotify.Spotify.GetCurrentlyPlaying(tokens[0].ToString());
                 if (currentlyPlaying.Error != null & currentlyPlaying.Error?.Status == 401)
                 {
@@ -141,29 +141,30 @@ internal abstract class Program
                     await Database.Database.UpdateAccessToken(db, refreshToken, update.InlineQuery.From.Id);
                     currentlyPlaying = await Spotify.Spotify.GetCurrentlyPlaying(tokens[0].ToString());
                 }
-                var currentlyPlayingResult = new InlineQueryResultAudio("audio", "1", currentlyPlaying.Item?.PreviewUrl ?? $"http://{Util.GetLocalIPAddress()}:35139/files/empty.mp3", currentlyPlaying.Item?.Name, currentlyPlaying.Item?.Artists?[0].Name, 30);
+                var currentlyPlayingResult = new InlineQueryResultAudio("audio", currentlyPlaying.Item?.Id, currentlyPlaying.Item?.PreviewUrl ?? $"http://{Util.GetLocalIPAddress()}:35139/files/empty.mp3", currentlyPlaying.Item?.Name, currentlyPlaying.Item?.Artists?[0].Name, null, "Downloading the song...", keyboard);
                 resultsList.Add(currentlyPlayingResult);
                 var recentlyPlayed = await Spotify.Spotify.GetRecentlyPlayed(tokens[0].ToString());
-                Console.WriteLine(recentlyPlayed.Dump());
                 if (recentlyPlayed.Items != null)
                 {
-                    resultsList.AddRange(recentlyPlayed.Items.Select(item => new InlineQueryResultAudio("audio", item.Item.Name, item.Item.PreviewUrl ?? $"http://{Util.GetLocalIPAddress()}:35139/files/empty.mp3", item.Item.Name, item.Item.Artists?[0].Name, 30)).Cast<object>());
+                    resultsList.AddRange(recentlyPlayed.Items.Select(item => new InlineQueryResultAudio("audio", item.Item.Id, item.Item.PreviewUrl ?? $"http://{Util.GetLocalIPAddress()}:35139/files/empty.mp3", item.Item.Name, item.Item.Artists?[0].Name, null, "Downloading the song...", keyboard)).Cast<object>());
                 }
-                Console.WriteLine(resultsList.Dump());
                 var test = await BotApi.AnswerInlineQuery(update.InlineQuery.Id, resultsList);
+            }
+        }
+
+        if (update.ChosenInlineResult != null)
+        {
+            Console.WriteLine(update.ChosenInlineResult);
+            var tokens = await Database.Database.GetTokens(db, update.ChosenInlineResult.From.Id);
+            var track = await Spotify.Spotify.GetTrack(update.ChosenInlineResult.ResultId, tokens[0].ToString());
+            if (track.Error == null)
+            {
+                var audiompeg = await YouTubeDL.YouTubeDL.Download($"{track.Name} - {track.Artists[0].Name} {track.Album.Name}");
+                var audioSent = await BotApi.SendAudio(-1002012184102, audiompeg, track.Album.Images[0].Url, track.Name, track.Artists[0].Name, (track.DurationMs / 1000) ?? 0);
+                var audio = new InputMediaAudio("audio", audioSent.Result.Audio.FileId, track.Name, track.Artists[0].Name, track.Album.Images[0].Url, (track.DurationMs / 1000));
+                var test = await BotApi.EditMessageMedia(update.ChosenInlineResult.InlineMessageId, audio);
                 Console.WriteLine(test);
             }
-            // example to keep in mind
-            /*if (update.InlineQuery.Query == "chainsmokers")
-            {
-                var audio = new InlineQueryResultCachedAudio("audio", "chainsmokers", "CQACAgQAAxkDAAIZJWV6MOxYAhCWhUs1v8v46_qH18tDAALHEgACzq7QUzg6I1_VaUCJMwQ");
-                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, [audio]);
-            }
-            else
-            {
-                var article = new InlineQueryResultArticle("article", "rockanro", "lesgo", new InputMessageContent("input message content"), null, null, false, "description");
-                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, [article]);
-            }*/
         }
         
     }

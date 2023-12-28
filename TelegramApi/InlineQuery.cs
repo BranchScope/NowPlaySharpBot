@@ -89,7 +89,7 @@ public class InlineQueryResultCachedAudio
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public InputMessageContent? InputMessageContent { get; init; }
 
-    public InlineQueryResultCachedAudio(string type, string id, string audioFileId, string? caption = null, string? parseMode = "HTML", InlineKeyboard? replyMarkup = null, InputMessageContent? inputMessageContent = null)
+    public InlineQueryResultCachedAudio(string type, string id, string audioFileId, string? caption = null, InlineKeyboard? replyMarkup = null, InputMessageContent? inputMessageContent = null, string? parseMode = "HTML")
     {
         Type = type;
         Id = id;
@@ -140,7 +140,7 @@ public class InlineQueryResultAudio
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public InputMessageContent? InputMessageContent { get; init; }
     
-    public InlineQueryResultAudio(string type, string id, string audioUrl, string title, string? performer = null, int? audioDuration = null, string? caption = null, string? parseMode = "HTML", InlineKeyboard? replyMarkup = null, InputMessageContent? inputMessageContent = null)
+    public InlineQueryResultAudio(string type, string id, string audioUrl, string title, string? performer = null, int? audioDuration = null, string? caption = null, InlineKeyboard? replyMarkup = null, InputMessageContent? inputMessageContent = null, string? parseMode = "HTML")
     {
         Type = type;
         Id = id;
@@ -196,5 +196,47 @@ public class InlineQueryResultButton
         WebApp = webApp;
         StartParameter = startParameter;
         Text = text;
+    }
+}
+
+public class InputMediaAudio
+{
+    [JsonPropertyName("type")] public string Type { get; init; }
+    [JsonPropertyName("media")] public string Media { get; init; }
+    
+    [JsonPropertyName("title")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Title { get; init; }
+    
+    [JsonPropertyName("performer")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Performer { get; init; }
+    
+    [JsonPropertyName("duration")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Duration { get; init; }
+    
+    [JsonPropertyName("thumbnail")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Thumbnail { get; init; }
+    
+    [JsonPropertyName("caption")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Caption { get; init; }
+    
+    [JsonPropertyName("parse_mode")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ParseMode { get; init; }
+
+    public InputMediaAudio(string type, string media, string? title = null, string? performer = null, string? thumbnail = null, int? duration = null, string? caption = null, string? parseMode = "HTML")
+    {
+        Type = type;
+        Media = media;
+        Title = title;
+        Performer = performer;
+        Thumbnail = thumbnail;
+        Duration = duration;
+        Caption = caption;
+        ParseMode = parseMode;
     }
 }

@@ -5,6 +5,8 @@ namespace NowPlaySharpBot.TelegramApi;
 
 public static class Util
 {
+    
+    // https://stackoverflow.com/a/6803109
     public static string GetLocalIPAddress()
     {
         var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -18,4 +20,5 @@ public static class Util
 
         throw new Exception("No network adapters with an IPv4 address in the system!");
     }
+    
 }

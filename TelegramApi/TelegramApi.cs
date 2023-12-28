@@ -77,7 +77,7 @@ public sealed class BotApi
     }
     
     // https://core.telegram.org/bots/api#sendaudio
-    public static async Task<Response<Result>> SendAudio(long chatId, string audio, string? thumbnail = null, string? caption = null, InlineKeyboard? keyboard = null)
+    public static async Task<Response<Result>> SendAudio(long chatId, string audio, string? thumbnail = null, string? title = null, string? performer = null, int duration = 0, string? caption = null, InlineKeyboard? keyboard = null)
     {
         var request = new RestRequest("sendAudio", Method.Post);
         
@@ -86,9 +86,25 @@ public sealed class BotApi
         request.AddParameter("caption", caption);
         request.AddParameter("parse_mode", "HTML");
         request.AddFile("audio", audio);
+        
         if (thumbnail != null)
         {
-            request.AddFile("thumbnail", thumbnail);
+            request.AddParameter("thumbnail", thumbnail);
+        }
+
+        if (title != null)
+        {
+            request.AddParameter("title", title);
+        }
+        
+        if (performer != null)
+        {
+            request.AddParameter("performer", performer);
+        }
+        
+        if (duration != null)
+        {
+            request.AddParameter("duration", duration);
         }
 
         if (keyboard != null)
@@ -121,6 +137,28 @@ public sealed class BotApi
         request.AddJsonBody(param);
         var response = await Client.ExecutePostAsync(request);
         return JsonSerializer.Deserialize<Response<Result>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+    }
+    
+    public static async Task<Response<bool>> EditMessageMedia(string inlineMessageId, InputMediaAudio audio, InlineKeyboard? keyboard = null, bool disableWebPagePreview = true)
+    {
+        var request = new RestRequest("editMessageMedia", Method.Post);
+        var param = new Dictionary<string, object>
+        {
+            { "inline_message_id", inlineMessageId },
+            { "media", JsonSerializer.Serialize(audio) },
+            { "disable_web_page_preview", disableWebPagePreview },
+            { "parse_mode", "HTML" }
+        };
+
+        if (keyboard != null)
+        {
+            param.Add("reply_markup", JsonSerializer.Serialize(keyboard));
+        }
+        
+        request.AddJsonBody(param);
+        var response = await Client.ExecutePostAsync(request);
+        Console.WriteLine(response.Content);
+        return JsonSerializer.Deserialize<Response<bool>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
 
     // https://core.telegram.org/bots/api#answercallbackquery

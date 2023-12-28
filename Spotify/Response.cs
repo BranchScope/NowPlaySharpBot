@@ -29,6 +29,19 @@ public record RecentlyPlayedResponse
     [JsonPropertyName("error")] public Error? Error { get; init; }
 }
 
+public record TrackResponse
+{
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("album")] public Album? Album { get; init; }
+    [JsonPropertyName("artists")] public List<Artist>? Artists { get; init; }
+    [JsonPropertyName("preview_url")] public string? PreviewUrl { get; init; }
+    [JsonPropertyName("duration_ms")] public int? DurationMs { get; init; }
+    
+    // error handling
+    [JsonPropertyName("error")] public Error? Error { get; init; }
+}
+
 public record Track
 {
     [JsonPropertyName("track")] public Item? Item { get; init; }

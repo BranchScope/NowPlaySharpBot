@@ -73,12 +73,11 @@ public sealed class Spotify
         request.AddHeader("Authorization", $"Bearer {code}");
 
         var response = await ApiClient.ExecuteGetAsync(request);
-        Console.WriteLine(response.Content);
         return JsonSerializer.Deserialize<CurrentlyPlayingResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-recently-played
-    public static async Task<RecentlyPlayedResponse> GetRecentlyPlayed(string code)
+    public static async Task<RecentlyPlayedResponse> GetRecentlyPlayed(string? code)
     {
         var request = new RestRequest("me/player/recently-played", Method.Get);
         request.AddHeader("Authorization", $"Bearer {code}");
@@ -86,6 +85,18 @@ public sealed class Spotify
 
         var response = await ApiClient.ExecuteGetAsync(request);
         return JsonSerializer.Deserialize<RecentlyPlayedResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+    }
+    
+    // 
+    public static async Task<TrackResponse> GetTrack(string? id, string? code)
+    {
+        {
+            var request = new RestRequest($"tracks/{id}", Method.Get);
+            request.AddHeader("Authorization", $"Bearer {code}");
+
+            var response = await ApiClient.ExecuteGetAsync(request);
+            return JsonSerializer.Deserialize<TrackResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        }
     }
 
     public static async Task<string> Login(string code, string state, NpgsqlConnection db)

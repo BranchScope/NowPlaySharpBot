@@ -45,7 +45,8 @@ public record From
 public record Chat
 {
     [JsonPropertyName("id")] public long Id { get; init; }
-    [JsonPropertyName("first_name")] public required string FirstName { get; init; }
+    [JsonPropertyName("first_name")] public string? FirstName { get; init; }
+    [JsonPropertyName("title")] public string? Title { get; init; }
     [JsonPropertyName("last_name")] public string? LastName { get; init; }
     [JsonPropertyName("username")] public string? Username { get; init; }
     [JsonPropertyName("type")] public required string Type { get; init; }
