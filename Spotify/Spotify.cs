@@ -7,7 +7,7 @@ using RestSharp;
 
 namespace NowPlaySharpBot.Spotify;
 
-public sealed class Spotify
+public class Spotify
 {
     private const string AuthResource = "https://accounts.spotify.com";
     private const string ApiResource = "https://api.spotify.com/v1";
@@ -29,13 +29,13 @@ public sealed class Spotify
     private static readonly RestClient AuthClient = new RestClient(options: AuthOptions);
 
     // https://developer.spotify.com/documentation/web-api/tutorials/code-flow
-    public static string GenAuthUrl(string state)
+    public string GenAuthUrl(string state)
     {
         return $"{AuthResource}/authorize?response_type=code&client_id={ClientId}&scope={HttpUtility.UrlEncode(ApiScopes)}&redirect_uri={RedirectResource + "/login"}&state={state}";
     }
 
     // https://developer.spotify.com/documentation/web-api/tutorials/code-flow
-    private static async Task<AuthResponse> GetAccessToken(string code)
+    public async Task<AuthResponse> GetAccessToken(string code)
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(ClientId + ":" + ClientSecret);
         var base64Credentials = Convert.ToBase64String(plainTextBytes);
@@ -51,7 +51,7 @@ public sealed class Spotify
     }
 
     // https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens
-    public static async Task<AuthResponse> RefreshToken(string? refreshToken)
+    public async Task<bool> RefreshToken(string refreshToken, long userId, NpgsqlConnection db)
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(ClientId + ":" + ClientSecret);
         var base64Credentials = Convert.ToBase64String(plainTextBytes);
@@ -63,21 +63,39 @@ public sealed class Spotify
         request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
         
         var response = await AuthClient.ExecutePostAsync(request);
-        return JsonSerializer.Deserialize<AuthResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        Console.WriteLine(response.Content);
+        var deserializedResponse = JsonSerializer.Deserialize<AuthResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        if (deserializedResponse.Error == "invalid_grant")
+        {
+            return false;
+        }
+        await Database.Database.UpdateAccessToken(db, deserializedResponse, userId);
+        return true;
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-the-users-currently-playing-track
-    public static async Task<CurrentlyPlayingResponse> GetCurrentlyPlaying(string? code)
+    public async Task<CurrentlyPlayingResponse> GetCurrentlyPlaying(string code, long userId, NpgsqlConnection db)
     {
         var request = new RestRequest("me/player/currently-playing", Method.Get);
         request.AddHeader("Authorization", $"Bearer {code}");
 
         var response = await ApiClient.ExecuteGetAsync(request);
-        return JsonSerializer.Deserialize<CurrentlyPlayingResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        var deserializedResponse = JsonSerializer.Deserialize<CurrentlyPlayingResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        if (deserializedResponse.Error != null)
+        {
+            var refreshStatus = await RefreshToken(code, userId, db);
+            if (refreshStatus == false)
+            {
+                return null;
+            }
+            return await GetCurrentlyPlaying(code, userId, db);
+        }
+        
+        return deserializedResponse;
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-recently-played
-    public static async Task<RecentlyPlayedResponse> GetRecentlyPlayed(string? code)
+    public async Task<RecentlyPlayedResponse> GetRecentlyPlayed(string? code)
     {
         var request = new RestRequest("me/player/recently-played", Method.Get);
         request.AddHeader("Authorization", $"Bearer {code}");
@@ -87,8 +105,8 @@ public sealed class Spotify
         return JsonSerializer.Deserialize<RecentlyPlayedResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
-    // 
-    public static async Task<TrackResponse> GetTrack(string? id, string? code)
+    // https://developer.spotify.com/documentation/web-api/reference/get-track
+    public async Task<TrackResponse> GetTrack(string id, string code)
     {
         {
             var request = new RestRequest($"tracks/{id}", Method.Get);
@@ -99,7 +117,7 @@ public sealed class Spotify
         }
     }
 
-    public static async Task<string> Login(string code, string state, NpgsqlConnection db)
+    public async Task<string> Login(string code, string state, NpgsqlConnection db)
     {
         var auth = await GetAccessToken(code);
         await Database.Database.AddTokens(db, auth, state);

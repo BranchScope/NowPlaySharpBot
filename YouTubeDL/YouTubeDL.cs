@@ -20,7 +20,7 @@ public sealed class YouTubeDL
     /// There are no checks there either, but it is well known that YouTube Music has more music than other platforms
     /// (They are all excuses to the fact that I don't want to create a downloader for Deezer :P)
     /// </summary>
-    public static async Task<dynamic?> Download(string query, string songId)
+    public static async Task<string?> Download(string query, string songId)
     {
         var process = new ProcessStartInfo
         {

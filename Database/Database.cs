@@ -5,7 +5,7 @@ namespace NowPlaySharpBot.Database;
 
 public class Database
 {
-    private NpgsqlConnection db { get; set; }
+    internal NpgsqlConnection db { get; set; }
     private static readonly string? PgHost = Environment.GetEnvironmentVariable("POSTGRES_HOST");
     private static readonly string? PgUsername = Environment.GetEnvironmentVariable("POSTGRES_USER");
     private static readonly string? PgPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
@@ -13,12 +13,12 @@ public class Database
 
     private static readonly string PgConnectionString = $"Host={PgHost};Username={PgUsername};Password={PgPassword};Database={PgDatabaseName}";
 
-    public static async Task<NpgsqlConnection> Connect()
+    public Database()
     {
         var con = new NpgsqlConnection(
             connectionString: PgConnectionString);
         con.Open();
-        return con;
+        this.db = con;
     }
 
     public static async Task<long> CheckUser(NpgsqlConnection db, long user_id)
@@ -33,7 +33,7 @@ public class Database
 
     public static async Task<int> AddUser(NpgsqlConnection db, User user)
     {
-        var query = "INSERT INTO users(user_id, first_name, last_name, username, lang) VALUES(@user_id, @first_name, @last_name, @username, @lang)";
+        var query = "INSERT INTO users(user_id, first_name, last_name, username, lang) VALUES(@user_id, @first_name, @last_name, @username, @lang) ON CONFLICT (user_id) DO UPDATE SET first_name = @first_name, last_name = @last_name, username = @username";
         var cmd = new NpgsqlCommand(query, db);
         cmd.Parameters.AddWithValue("user_id", user.Id);
         cmd.Parameters.AddWithValue("first_name", user.FirstName);
@@ -47,10 +47,10 @@ public class Database
 
     public static async Task<int> AddTokens(NpgsqlConnection db, AuthResponse auth, string state)
     {
-        var user_id = BitConverter.ToInt64(Convert.FromBase64String(state));
-        var query = "INSERT INTO tokens(user_id, access_token, refresh_token) VALUES(@user_id, @access_token, @refresh_token)";
+        var userId = BitConverter.ToInt64(Convert.FromBase64String(state));
+        var query = "INSERT INTO tokens(user_id, access_token, refresh_token) VALUES(@user_id, @access_token, @refresh_token) ON CONFLICT (user_id) DO UPDATE SET access_token = @access_token, refresh_token = @refresh_token";
         var cmd = new NpgsqlCommand(query, db);
-        cmd.Parameters.AddWithValue("user_id", user_id);
+        cmd.Parameters.AddWithValue("user_id", userId);
         cmd.Parameters.AddWithValue("access_token", auth.AccessToken);
         cmd.Parameters.AddWithValue("refresh_token", auth.RefreshToken);
         await cmd.PrepareAsync();
@@ -58,10 +58,10 @@ public class Database
         return r;
     }
 
-    public static async Task<List<object>> GetTokens(NpgsqlConnection db, long user_id)
+    public static async Task<List<object>> GetTokens(NpgsqlConnection db, long userId)
     {
         var cmd = new NpgsqlCommand($"SELECT access_token,refresh_token FROM tokens WHERE user_id = @user_id", db);
-        cmd.Parameters.AddWithValue("user_id", user_id);
+        cmd.Parameters.AddWithValue("user_id", userId);
         await cmd.PrepareAsync();
         var dr = await cmd.ExecuteReaderAsync();
         
@@ -76,12 +76,12 @@ public class Database
         return tokens;
     }
     
-    public static async Task<int> UpdateAccessToken(NpgsqlConnection db, AuthResponse auth, long user_id)
+    public static async Task<int> UpdateAccessToken(NpgsqlConnection db, AuthResponse auth, long userId)
     {
         var query = "UPDATE tokens SET access_token = @access_token WHERE user_id = @user_id";
         var cmd = new NpgsqlCommand(query, db);
         cmd.Parameters.AddWithValue("access_token", auth.AccessToken);
-        cmd.Parameters.AddWithValue("user_id", user_id);
+        cmd.Parameters.AddWithValue("user_id", userId);
         await cmd.PrepareAsync();
         var r = await cmd.ExecuteNonQueryAsync();
         return r;
