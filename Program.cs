@@ -115,7 +115,7 @@ async void OnUpdate(object? sender, UpdateEventArgs e)
             }
             else
             {
-                List<object> resultsList = [];
+                List<InlineQueryResultAudio> resultsList = new List<InlineQueryResultAudio>();
                 var keyboard = new InlineKeyboard(
                     [
                         [
@@ -153,7 +153,8 @@ async void OnUpdate(object? sender, UpdateEventArgs e)
                         resultsList.Add(result);
                     }
                 }
-                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, resultsList);
+                var distinctResultsList = resultsList.Distinct(InlineQueryResultAudio.IdComparer).ToList();
+                await BotApi.AnswerInlineQuery(update.InlineQuery.Id, distinctResultsList);
             }
         }
 

@@ -104,6 +104,25 @@ public class InlineQueryResultCachedAudio
 
 public class InlineQueryResultAudio
 {
+    public sealed class IdEqualityComparer : IEqualityComparer<InlineQueryResultAudio>
+    {
+        public bool Equals(InlineQueryResultAudio x, InlineQueryResultAudio y)
+        {
+            if (ReferenceEquals(x, y)) return true;
+            if (ReferenceEquals(x, null)) return false;
+            if (ReferenceEquals(y, null)) return false;
+            if (x.GetType() != y.GetType()) return false;
+            return string.Equals(x.Id, y.Id, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode(InlineQueryResultAudio obj)
+        {
+            return StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Id);
+        }
+    }
+
+    public static IEqualityComparer<InlineQueryResultAudio> IdComparer { get; } = new IdEqualityComparer();
+
     [JsonPropertyName("type")]
     public string Type { get; init; }
     
@@ -153,7 +172,6 @@ public class InlineQueryResultAudio
         ReplyMarkup = replyMarkup;
         InputMessageContent = inputMessageContent;
     }
-    
 }
 
 public class InputMessageContent

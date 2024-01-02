@@ -188,7 +188,7 @@ public sealed class BotApi
     }
     
     // https://core.telegram.org/bots/api#answerinlinequery
-    public static async Task<Response<bool>> AnswerInlineQuery(string inlineQueryId, List<object> results, InlineQueryResultButton? button = null, int cacheTime = 0)
+    public static async Task<Response<bool>> AnswerInlineQuery(string inlineQueryId, List<InlineQueryResultAudio> results, InlineQueryResultButton? button = null, int cacheTime = 0)
     {
         var request = new RestRequest("answerInlineQuery", Method.Post);
         var param = new Dictionary<string, object>

@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
-
-namespace NowPlaySharpBot.Spotify;
+﻿namespace NowPlaySharpBot.Spotify;
 
 public class SpotifyWrap
 {
@@ -11,7 +8,6 @@ public class SpotifyWrap
     public SpotifyWrap(Database.Database db)
     {
         _db = db;
-        Console.WriteLine(_db.db.State);
     }
 
     public string GenAuthUrl(string state) => _api.GenAuthUrl(state);

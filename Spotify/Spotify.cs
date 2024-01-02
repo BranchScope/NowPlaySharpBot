@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
 using System.Web;
-using System.Xml;
-using NowPlaySharpBot.TelegramApi;
 using Npgsql;
 using RestSharp;
 
@@ -63,7 +61,6 @@ public class Spotify
         request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
         
         var response = await AuthClient.ExecutePostAsync(request);
-        Console.WriteLine(response.Content);
         var deserializedResponse = JsonSerializer.Deserialize<AuthResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
         if (deserializedResponse.Error == "invalid_grant")
         {
@@ -81,17 +78,9 @@ public class Spotify
 
         var response = await ApiClient.ExecuteGetAsync(request);
         var deserializedResponse = JsonSerializer.Deserialize<CurrentlyPlayingResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
-        if (deserializedResponse.Error != null)
-        {
-            var refreshStatus = await RefreshToken(code, userId, db);
-            if (refreshStatus == false)
-            {
-                return null;
-            }
-            return await GetCurrentlyPlaying(code, userId, db);
-        }
-        
-        return deserializedResponse;
+        if (deserializedResponse.Error == null) return deserializedResponse;
+        var refreshStatus = await RefreshToken(Database.Database.GetTokens(db, userId).Result[1].ToString(), userId, db);
+        return refreshStatus == true ? deserializedResponse : null;
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-recently-played
