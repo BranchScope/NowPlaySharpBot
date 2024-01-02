@@ -129,10 +129,12 @@ async void OnUpdate(object? sender, UpdateEventArgs e)
                     await BotApi.AnswerInlineQuery(update.InlineQuery.Id, [], defaultButton);
                     return;
                 }
-
-                var audio = currentlyPlaying.Item != null ? await Database.GetMusic(db, currentlyPlaying.Item.Id) : null;
-                var currentlyPlayingResult = new InlineQueryResultAudio("audio", currentlyPlaying.Item?.Id, audio ?? currentlyPlaying.Item?.PreviewUrl ?? $"{callbackUrl}/files/empty.mp3", currentlyPlaying.Item?.Name, string.Join(", ", currentlyPlaying.Item.Artists.Select(artist => artist.Name)), null, (audio == null) ? "Downloading the song..." : null, (audio == null) ? keyboard : null);
-                resultsList.Add(currentlyPlayingResult);
+                
+                if (currentlyPlaying.Item != null){
+                    var audio = currentlyPlaying.Item != null ? await Database.GetMusic(db, currentlyPlaying.Item.Id) : null;
+                    var currentlyPlayingResult = new InlineQueryResultAudio("audio", currentlyPlaying.Item?.Id, audio ?? currentlyPlaying.Item?.PreviewUrl ?? $"{callbackUrl}/files/empty.mp3", currentlyPlaying.Item?.Name, string.Join(", ", currentlyPlaying.Item.Artists.Select(artist => artist.Name)), null, (audio == null) ? "Downloading the song..." : null, (audio == null) ? keyboard : null);
+                    resultsList.Add(currentlyPlayingResult);
+                }
 
                 var recentlyPlayed = await SpotifyWrap.GetRecentlyPlayed(tokens[0].ToString());
                 if (recentlyPlayed.Items != null)
