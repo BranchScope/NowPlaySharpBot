@@ -71,16 +71,18 @@ public class Spotify
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-the-users-currently-playing-track
-    public async Task<CurrentlyPlayingResponse> GetCurrentlyPlaying(string code, long userId, NpgsqlConnection db)
+    public async Task<CurrentlyPlayingResponse> GetCurrentlyPlaying(string? code, long userId, NpgsqlConnection db)
     {
         var request = new RestRequest("me/player/currently-playing", Method.Get);
         request.AddHeader("Authorization", $"Bearer {code}");
 
         var response = await ApiClient.ExecuteGetAsync(request);
+        if (response.Content == "") return new CurrentlyPlayingResponse();
         var deserializedResponse = JsonSerializer.Deserialize<CurrentlyPlayingResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
         if (deserializedResponse.Error == null) return deserializedResponse;
         var refreshStatus = await RefreshToken(Database.Database.GetTokens(db, userId).Result[1].ToString(), userId, db);
         return refreshStatus == true ? deserializedResponse : null;
+
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-recently-played
@@ -91,6 +93,7 @@ public class Spotify
         request.AddParameter("limit", 4);
 
         var response = await ApiClient.ExecuteGetAsync(request);
+        if (response.Content == "EMPTY_RESPONSE") return null;
         return JsonSerializer.Deserialize<RecentlyPlayedResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     

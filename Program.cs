@@ -25,7 +25,7 @@ app.MapGet("/login", async (string code, string state) => (await SpotifyWrap.Log
 
 var webTask = app.RunAsync("http://*:35139");
 bot.UpdateReceived += OnUpdate;
-var updateTask = bot.StartUpdatingAsync(db.db);
+var updateTask = bot.StartUpdatingAsync(db.Db);
 Console.WriteLine("Bot is running, HALLELUJAH!");
 await Task.WhenAll(webTask, updateTask);
 
@@ -39,7 +39,7 @@ async void OnUpdate(object? sender, UpdateEventArgs e)
             var checkUser = await Database.CheckUser(db, update.Message.From.Id);
             if (checkUser == 0)
             {
-                var a = await Database.AddUser(db, update.Message.From);
+                await Database.AddUser(db, update.Message.From);
             }
 
             string? loginUrl;
@@ -130,9 +130,14 @@ async void OnUpdate(object? sender, UpdateEventArgs e)
                     return;
                 }
 
-                var audio = await Database.GetMusic(db, currentlyPlaying.Item?.Id);
-                var currentlyPlayingResult = new InlineQueryResultAudio("audio", currentlyPlaying.Item?.Id, audio ?? currentlyPlaying.Item?.PreviewUrl ?? $"{callbackUrl}/files/empty.mp3", currentlyPlaying.Item?.Name, string.Join(", ", currentlyPlaying.Item.Artists.Select(artist => artist.Name)), null, (audio == null) ? "Downloading the song..." : null, (audio == null) ? keyboard : null);
-                resultsList.Add(currentlyPlayingResult);
+                var audio = currentlyPlaying.Item != null ? await Database.GetMusic(db, currentlyPlaying.Item.Id) : null;
+                if (audio != null)
+                {
+                    var currentlyPlayingResult = new InlineQueryResultAudio("audio", currentlyPlaying.Item?.Id, audio ?? currentlyPlaying.Item?.PreviewUrl ?? $"{callbackUrl}/files/empty.mp3", currentlyPlaying.Item?.Name,
+                        string.Join(", ", currentlyPlaying.Item.Artists.Select(artist => artist.Name)), null, (audio == null) ? "Downloading the song..." : null, (audio == null) ? keyboard : null);
+                    resultsList.Add(currentlyPlayingResult);
+                }
+
                 var recentlyPlayed = await SpotifyWrap.GetRecentlyPlayed(tokens[0].ToString());
                 if (recentlyPlayed.Items != null)
                 {

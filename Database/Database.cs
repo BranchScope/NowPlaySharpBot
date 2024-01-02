@@ -5,7 +5,7 @@ namespace NowPlaySharpBot.Database;
 
 public class Database
 {
-    internal NpgsqlConnection db { get; set; }
+    internal NpgsqlConnection Db { get; set; }
     private static readonly string? PgHost = Environment.GetEnvironmentVariable("POSTGRES_HOST");
     private static readonly string? PgUsername = Environment.GetEnvironmentVariable("POSTGRES_USER");
     private static readonly string? PgPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
@@ -15,17 +15,16 @@ public class Database
 
     public Database()
     {
-        var con = new NpgsqlConnection(
-            connectionString: PgConnectionString);
+        var con = new NpgsqlConnection(connectionString: PgConnectionString);
         con.Open();
-        this.db = con;
+        this.Db = con;
     }
 
-    public static async Task<long> CheckUser(NpgsqlConnection db, long user_id)
+    public static async Task<long> CheckUser(NpgsqlConnection db, long userId)
     {
         var query = "SELECT COUNT(*) FROM users WHERE user_id = @user_id";
         var cmd = new NpgsqlCommand(query, db);
-        cmd.Parameters.AddWithValue("user_id", user_id);
+        cmd.Parameters.AddWithValue("user_id", userId);
         await cmd.PrepareAsync();
         var count = (long)await cmd.ExecuteScalarAsync();
         return count;
