@@ -162,7 +162,7 @@ public sealed class BotApi
     }
 
     // https://core.telegram.org/bots/api#answercallbackquery
-    public static async Task<Response<Result>> AnswerCallbackQuery(string callbackQueryId, int cacheTime = 0, bool showAlert = false, string? text = null, string? url = null)
+    public static async Task<Response<bool>> AnswerCallbackQuery(string callbackQueryId, int cacheTime = 0, bool showAlert = false, string? text = null, string? url = null)
     {
         var request = new RestRequest("answerCallbackQuery", Method.Post);
         var param = new Dictionary<string, object>
@@ -184,7 +184,7 @@ public sealed class BotApi
         
         request.AddJsonBody(param);
         var response = await Client.ExecutePostAsync(request);
-        return JsonSerializer.Deserialize<Response<Result>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
+        return JsonSerializer.Deserialize<Response<bool>>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     
     // https://core.telegram.org/bots/api#answerinlinequery

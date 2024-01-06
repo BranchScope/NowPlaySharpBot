@@ -6,7 +6,8 @@ namespace NowPlaySharpBot.Database;
 public class Database
 {
     internal NpgsqlConnection Db { get; set; }
-    private static readonly string? PgHost = "database"; //hardcoded because of the docker infrastructure i built
+    private static readonly string? IsRunningInContainer = Environment.GetEnvironmentVariable("CONTAINERIZE_THESE_NUTS");
+    private static readonly string? PgHost = IsRunningInContainer == "true" ? "database" : "localhost"; //200iq stuffs here
     private static readonly string? PgUsername = Environment.GetEnvironmentVariable("POSTGRES_USERNAME");
     private static readonly string? PgPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
     private static readonly string? PgDatabaseName = Environment.GetEnvironmentVariable("POSTGRES_DBNAME");
