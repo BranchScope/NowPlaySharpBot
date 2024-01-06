@@ -25,7 +25,7 @@ public sealed class YouTubeDL
         var process = new ProcessStartInfo
         {
             FileName = YtDlpPath,
-            Arguments = $"-f bestaudio -x --audio-format mp3 --audio-quality 320k --add-metadata --output \"{songId}.%(ext)s\" \"{Resource}/search?q={query}\" --playlist-items 1",
+            Arguments = $"-f bestaudio -x --audio-format mp3 --audio-quality 320k --add-metadata --output \"{songId}.%(ext)s\" \"{Resource}/search?q={query}#songs\" --playlist-items 1",
             RedirectStandardOutput = true,
         };
         var proc = Process.Start(process);

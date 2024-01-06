@@ -93,7 +93,7 @@ public class Spotify
         request.AddParameter("limit", 4);
 
         var response = await ApiClient.ExecuteGetAsync(request);
-        if (response.Content == "EMPTY_RESPONSE") return null;
+        if (response.Content == "") return null;
         return JsonSerializer.Deserialize<RecentlyPlayedResponse>(response.Content ?? throw new MissingFieldException()) ?? throw new Exception("wtf!?");
     }
     

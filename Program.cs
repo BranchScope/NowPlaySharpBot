@@ -168,7 +168,7 @@ async void OnUpdate(object? sender, UpdateEventArgs e)
             if (track.Error != null) return;
             {
                 if (string.IsNullOrEmpty(update.ChosenInlineResult.InlineMessageId)) return;
-                var audioName = await YouTubeDL.Download($"{track.Name} - {track.Artists[0].Name} {track.Album.Name}", track.Id);
+                var audioName = await YouTubeDL.Download($"{track.Artists[0].Name} - {track.Name} ({track.Album.Name})", track.Id);
                 var audioSent = await BotApi.SendAudio(-1002012184102, audioName, track.Album.Images[0].Url, track.Name, string.Join(", ", track.Artists.Select(artist => artist.Name)), (track.DurationMs / 1000) ?? 0);
                 var audio = new InputMediaAudio("audio", audioSent.Result.Audio.FileId, track.Name, string.Join(", ", track.Artists.Select(artist => artist.Name)), track.Album.Images[0].Url, (track.DurationMs / 1000));
                 await BotApi.EditMessageMedia(update.ChosenInlineResult.InlineMessageId, audio);

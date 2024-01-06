@@ -1,0 +1,35 @@
+﻿services:
+  nowplaysharpbot:
+    image: nowplaysharpbot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DBNAME: ${POSTGRES_DBNAME}
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      CALLBACK_URL: ${CALLBACK_URL}
+      TOKEN: ${TOKEN}
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: postgres:alpine
+    restart: always
+    environment:
+      PGUSER: postgres
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    expose:
+      - 5432
+    volumes:
+      - ./Database/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./Database/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "nowplaysharpbot" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
