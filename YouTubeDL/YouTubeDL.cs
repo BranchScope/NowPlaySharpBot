@@ -6,7 +6,7 @@ namespace NowPlaySharpBot.YouTubeDL;
 public sealed class YouTubeDL
 {
     private const string Resource = "https://music.youtube.com";
-    private const string YtDlpPath = "yt-dlp.exe";
+    private const string YtDlpPath = "yt-dlp";
     private const string RePattern = @"\[ExtractAudio\] Destination: (.+)";
 
     private static string? ExtractedAudioReSearch(string logs)
@@ -27,6 +27,7 @@ public sealed class YouTubeDL
             FileName = YtDlpPath,
             Arguments = $"-f bestaudio -x --audio-format mp3 --audio-quality 320k --add-metadata --output \"{songId}.%(ext)s\" \"{Resource}/search?q={query}#songs\" --playlist-items 1",
             RedirectStandardOutput = true,
+            WorkingDirectory = "/app/workdir"
         };
         var proc = Process.Start(process);
         await proc.WaitForExitAsync();

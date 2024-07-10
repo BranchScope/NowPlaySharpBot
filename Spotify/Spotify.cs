@@ -82,7 +82,6 @@ public class Spotify
         if (deserializedResponse.Error == null) return deserializedResponse;
         var refreshStatus = await RefreshToken(Database.Database.GetTokens(db, userId).Result[1].ToString(), userId, db);
         return refreshStatus == true ? deserializedResponse : null;
-
     }
     
     // https://developer.spotify.com/documentation/web-api/reference/get-recently-played
