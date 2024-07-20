@@ -108,6 +108,15 @@ async void OnUpdate(object? sender, UpdateEventArgs e)
         if (update.InlineQuery != null)
         {
             var defaultButton = new InlineQueryResultButton("Login first!", null, "login");
+            
+            // search feature
+            if (update.InlineQuery.Query != "")
+            {
+                var search = await YouTubeDL.Search(update.InlineQuery.Query);
+                Console.WriteLine(search);
+            }
+            
+            // nowplay feature
             tokens = await Database.GetTokens(db, update.InlineQuery.From.Id);
             if (tokens.Count == 0)
             {
